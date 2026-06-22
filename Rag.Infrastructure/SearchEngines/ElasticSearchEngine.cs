@@ -134,7 +134,12 @@ public class ElasticSearchEngine : ISearchEngine
         }
         var response = await _client.BulkAsync(bulk, ct);
         if (!response.IsValid)
-            _logger.LogError("Bulk index failed: {Error}", response.ServerError?.Error?.Reason);
+        {
+            var reason = response.ServerError?.Error?.Reason;
+            var debug = response.DebugInformation;
+            _logger.LogError("Bulk index failed: {Error}. Debug: {Debug}", reason, debug);
+            throw new InvalidOperationException($"Bulk index failed: {reason ?? "unknown"}");
+        }
     }
 }
 
