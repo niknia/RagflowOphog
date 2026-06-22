@@ -18,7 +18,7 @@ public class ChromaVectorStore : IVectorStore
 
     public async Task CreateCollectionAsync(string collectionName, int vectorDimension = 1024, CancellationToken ct = default)
     {
-        var payload = new
+        var basePayload = new
         {
             name = collectionName,
             metadata = new Dictionary<string, object>
@@ -27,33 +27,67 @@ public class ChromaVectorStore : IVectorStore
             }
         };
 
-        var endpoints = new[] { "/api/v2/collections", "/api/v1/collections" };
-        HttpResponseMessage? response = null;
-
-        foreach (var endpoint in endpoints)
+        var getEndpoints = new[] { $"/api/v2/collections/{collectionName}", $"/api/v1/collections/{collectionName}" };
+        foreach (var getEndpoint in getEndpoints)
         {
             try
             {
-                response = await _httpClient.PostAsJsonAsync(endpoint, payload, ct);
+                var getResponse = await _httpClient.GetAsync(getEndpoint, ct);
+                if (getResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Chroma collection '{Name}' already exists (checked via {Endpoint})", collectionName, getEndpoint);
+                    return;
+                }
+                if (getResponse.StatusCode != System.Net.HttpStatusCode.NotFound)
+                {
+                    var errorContent = await getResponse.Content.ReadAsStringAsync(ct);
+                    _logger.LogWarning("Check collection via {Endpoint} failed: {StatusCode} - {Error}", getEndpoint, getResponse.StatusCode, errorContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Check collection via {Endpoint} threw exception", getEndpoint);
+            }
+        }
+
+        var createAttempts = new[]
+        {
+            new { Endpoint = "/api/v2/collections", Method = HttpMethod.Post },
+            new { Endpoint = "/api/v1/collections", Method = HttpMethod.Post },
+            new { Endpoint = "/api/v1/collections", Method = HttpMethod.Put },
+        };
+
+        HttpResponseMessage? response = null;
+
+        foreach (var attempt in createAttempts)
+        {
+            try
+            {
+                var request = new HttpRequestMessage(attempt.Method, attempt.Endpoint)
+                {
+                    Content = JsonContent.Create(basePayload)
+                };
+                response = await _httpClient.SendAsync(request, ct);
+                
                 if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation("Created Chroma collection '{Name}' via {Endpoint}", collectionName, endpoint);
+                    _logger.LogInformation("Created Chroma collection '{Name}' via {Method} {Endpoint}", collectionName, attempt.Method, attempt.Endpoint);
                     return;
                 }
 
                 var errorContent = await response.Content.ReadAsStringAsync(ct);
-                _logger.LogWarning("Create collection via {Endpoint} failed: {StatusCode} - {Error}", endpoint, response.StatusCode, errorContent);
+                _logger.LogWarning("Create collection via {Method} {Endpoint} failed: {StatusCode} - {Error}", attempt.Method, attempt.Endpoint, response.StatusCode, errorContent);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Create collection via {Endpoint} threw exception", endpoint);
+                _logger.LogWarning(ex, "Create collection via {Method} {Endpoint} threw exception", attempt.Method, attempt.Endpoint);
             }
         }
 
         if (response != null && !response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync(ct);
-            _logger.LogError("All endpoints failed for collection '{Name}'. Last error: {StatusCode} - {Error}", collectionName, response.StatusCode, errorContent);
+            _logger.LogError("All create attempts failed for collection '{Name}'. Last error: {StatusCode} - {Error}", collectionName, response.StatusCode, errorContent);
         }
 
         response?.EnsureSuccessStatusCode();
