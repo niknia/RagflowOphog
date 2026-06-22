@@ -1,0 +1,24 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["Rag.Api/Rag.Api.csproj", "Rag.Api/"]
+COPY ["Rag.Application/Rag.Application.csproj", "Rag.Application/"]
+COPY ["Rag.Domain/Rag.Domain.csproj", "Rag.Domain/"]
+COPY ["Rag.Infrastructure/Rag.Infrastructure.csproj", "Rag.Infrastructure/"]
+COPY ["Rag.Contracts/Rag.Contracts.csproj", "Rag.Contracts/"]
+COPY ["Rag.Shared/Rag.Shared.csproj", "Rag.Shared/"]
+RUN dotnet restore "Rag.Api/Rag.Api.csproj"
+COPY . .
+WORKDIR "/src/Rag.Api"
+RUN dotnet build "Rag.Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Rag.Api.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Rag.Api.dll"]

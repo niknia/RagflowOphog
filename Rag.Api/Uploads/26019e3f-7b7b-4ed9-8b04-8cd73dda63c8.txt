@@ -1,0 +1,1 @@
+This is a test document for progress tracking. It contains multiple sentences for chunking. The quick brown fox jumps over the lazy dog. Persian text: ???? ????. This document will be processed by the RAG platform worker.

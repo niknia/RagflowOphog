@@ -1,0 +1,174 @@
+2026-06-22 07:06:26.962 +03:30 [INF] Starting RAG Platform API
+2026-06-22 07:07:21.528 +03:30 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-06-22 07:07:21.543 +03:30 [INF] Request: GET /api/system/providers
+2026-06-22 07:07:21.549 +03:30 [INF] Response: 200
+2026-06-22 07:07:46.851 +03:30 [INF] Request: GET /api/system/status
+2026-06-22 07:07:51.354 +03:30 [INF] Response: 200
+2026-06-22 07:08:50.546 +03:30 [INF] Request: POST /api/documents/upload
+2026-06-22 07:08:50.790 +03:30 [INF] Document "29c8834d-f084-4b54-9e98-4e5d961108be" uploaded: TSP_API_1.2.0.pdf
+2026-06-22 07:08:50.794 +03:30 [INF] Response: 200
+2026-06-22 07:09:44.682 +03:30 [INF] Request: POST /api/documents/reindex/29c8834d-f084-4b54-9e98-4e5d961108be
+2026-06-22 07:09:44.690 +03:30 [INF] Response: 200
+2026-06-22 07:09:44.692 +03:30 [ERR] Unhandled exception
+System.InvalidOperationException: No service for type 'MediatR.IRequestHandler`2[Rag.Contracts.Commands.ReindexDocumentCommand,System.Boolean]' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at MediatR.Wrappers.RequestHandlerWrapperImpl`2.<>c__DisplayClass1_0.<Handle>g__Handler|0(CancellationToken t)
+   at MediatR.Wrappers.RequestHandlerWrapperImpl`2.Handle(IRequest`1 request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+   at MediatR.Mediator.Send[TResponse](IRequest`1 request, CancellationToken cancellationToken)
+   at Rag.Api.Controllers.DocumentsController.Reindex(Guid id, CancellationToken ct) in E:\project\RagPlatform\Rag.Api\Controllers\DocumentsController.cs:line 110
+   at lambda_method235(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Rag.Api.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in E:\project\RagPlatform\Rag.Api\Middleware\ExceptionMiddleware.cs:line 20
+2026-06-22 07:10:34.937 +03:30 [INF] Request: GET /api/collections
+2026-06-22 07:10:34.991 +03:30 [INF] Response: 200
+2026-06-22 07:10:42.292 +03:30 [INF] Request: POST /api/documents/reindex/29c8834d-f084-4b54-9e98-4e5d961108be
+2026-06-22 07:10:42.295 +03:30 [INF] Response: 200
+2026-06-22 07:10:42.298 +03:30 [ERR] Unhandled exception
+System.InvalidOperationException: No service for type 'MediatR.IRequestHandler`2[Rag.Contracts.Commands.ReindexDocumentCommand,System.Boolean]' has been registered.
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at MediatR.Wrappers.RequestHandlerWrapperImpl`2.<>c__DisplayClass1_0.<Handle>g__Handler|0(CancellationToken t)
+   at MediatR.Wrappers.RequestHandlerWrapperImpl`2.Handle(IRequest`1 request, IServiceProvider serviceProvider, CancellationToken cancellationToken)
+   at MediatR.Mediator.Send[TResponse](IRequest`1 request, CancellationToken cancellationToken)
+   at Rag.Api.Controllers.DocumentsController.Reindex(Guid id, CancellationToken ct) in E:\project\RagPlatform\Rag.Api\Controllers\DocumentsController.cs:line 110
+   at lambda_method235(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Rag.Api.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in E:\project\RagPlatform\Rag.Api\Middleware\ExceptionMiddleware.cs:line 20
+2026-06-22 07:12:55.190 +03:30 [INF] Starting RAG Platform API
+2026-06-22 07:13:08.282 +03:30 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-06-22 07:13:08.297 +03:30 [INF] Request: POST /api/documents/reindex/29c8834d-f084-4b54-9e98-4e5d961108be
+2026-06-22 07:13:08.768 +03:30 [ERR] Failed executing DbCommand (5ms) [Parameters=[@p19='?' (DbType = Guid), @p0='?' (DbType = Int32), @p1='?', @p2='?' (Size = 7), @p3='?' (Size = 14), @p4='?' (Size = 15), @p5='?' (DbType = DateTime), @p6='?' (Size = 6), @p7='?' (Size = 7), @p8='?', @p9='?' (Size = 17), @p10='?' (Size = 79), @p11='?' (DbType = Int64), @p12='?' (DbType = Int32), @p13='?' (DbType = Boolean), @p14='?', @p15='?' (DbType = DateTime), @p16='?' (DbType = Int32), @p17='?' (Size = 7), @p18='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Documents" SET "ChunkCount" = @p0, "CleanedContent" = @p1, "CollectionId" = @p2, "CollectionName" = @p3, "ContentType" = @p4, "CreatedAt" = @p5, "CreatedBy" = @p6, "DetectedLanguage" = @p7, "ErrorMessage" = @p8, "FileName" = @p9, "FilePath" = @p10, "FileSize" = @p11, "FileType" = @p12, "IsDeleted" = @p13, "OriginalContent" = @p14, "ProcessedAt" = @p15, "RetryCount" = @p16, "Status" = @p17, "UpdatedAt" = @p18
+WHERE "Id" = @p19
+RETURNING 1;
+2026-06-22 07:13:08.786 +03:30 [ERR] An exception occurred in the database while saving changes for context type 'Rag.Infrastructure.Persistence.RagDbContext'.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 19: 'NOT NULL constraint failed: Documents.ErrorMessage'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 19: 'NOT NULL constraint failed: Documents.ErrorMessage'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+2026-06-22 07:13:08.807 +03:30 [INF] Response: 200
+2026-06-22 07:13:08.810 +03:30 [ERR] Unhandled exception
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 19: 'NOT NULL constraint failed: Documents.ErrorMessage'.
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteDataReader.NextResult()
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.Data.Sqlite.SqliteCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Rag.Infrastructure.Persistence.DocumentRepository.UpdateAsync(Document document, CancellationToken ct) in E:\project\RagPlatform\Rag.Infrastructure\Persistence\DocumentRepository.cs:line 47
+   at Rag.Application.Handlers.ReindexDocumentHandler.Handle(ReindexDocumentCommand request, CancellationToken ct) in E:\project\RagPlatform\Rag.Application\Handlers\DocumentHandlers.cs:line 150
+   at Rag.Api.Controllers.DocumentsController.Reindex(Guid id, CancellationToken ct) in E:\project\RagPlatform\Rag.Api\Controllers\DocumentsController.cs:line 110
+   at lambda_method7(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Rag.Api.Middleware.ExceptionMiddleware.InvokeAsync(HttpContext context) in E:\project\RagPlatform\Rag.Api\Middleware\ExceptionMiddleware.cs:line 20
+2026-06-22 07:13:20.961 +03:30 [INF] Request: GET /api/documents
+2026-06-22 07:13:21.106 +03:30 [INF] Response: 200
+2026-06-22 07:14:07.499 +03:30 [INF] Starting RAG Platform API
+2026-06-22 07:14:20.445 +03:30 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-06-22 07:14:20.470 +03:30 [INF] Request: POST /api/documents/reindex/29c8834d-f084-4b54-9e98-4e5d961108be
+2026-06-22 07:14:20.759 +03:30 [INF] Response: 200
+2026-06-22 07:14:30.210 +03:30 [INF] Request: GET /api/documents
+2026-06-22 07:14:30.300 +03:30 [INF] Response: 200
+2026-06-22 07:14:43.067 +03:30 [INF] Starting RAG Platform API
+2026-06-22 07:14:56.373 +03:30 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-06-22 07:14:56.384 +03:30 [INF] Request: GET /api/system/status
+2026-06-22 07:15:00.773 +03:30 [INF] Response: 200
+2026-06-22 07:15:08.374 +03:30 [INF] Request: POST /api/documents/upload
+2026-06-22 07:15:08.632 +03:30 [INF] Document "8df4d0a9-f1d3-4e20-b937-767bdb29dad4" uploaded: tmp8A4F.tmp.txt
+2026-06-22 07:15:08.635 +03:30 [INF] Response: 200
+2026-06-22 07:15:12.529 +03:30 [INF] Request: POST /api/documents/reindex/8df4d0a9-f1d3-4e20-b937-767bdb29dad4
+2026-06-22 07:15:12.603 +03:30 [INF] Document "8df4d0a9-f1d3-4e20-b937-767bdb29dad4" queued for reindexing
+2026-06-22 07:15:12.605 +03:30 [INF] Response: 200
+2026-06-22 07:17:45.851 +03:30 [INF] Request: POST /api/documents/reindex/29c8834d-f084-4b54-9e98-4e5d961108be
+2026-06-22 07:17:45.862 +03:30 [INF] Response: 200
+2026-06-22 07:45:51.650 +03:30 [INF] Starting RAG Platform API
+2026-06-22 07:46:04.177 +03:30 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-06-22 07:46:04.190 +03:30 [INF] Request: GET /api/system/status
+2026-06-22 07:46:08.615 +03:30 [INF] Response: 200
+2026-06-22 07:46:14.892 +03:30 [INF] Request: POST /api/documents/upload
+2026-06-22 07:46:15.135 +03:30 [INF] Document "bc6b2cb0-c663-43f6-8d31-5ea7fa765587" uploaded: tmp534.tmp.txt
+2026-06-22 07:46:15.139 +03:30 [INF] Response: 200
+2026-06-22 07:46:19.070 +03:30 [INF] Request: GET /api/documents/bc6b2cb0-c663-43f6-8d31-5ea7fa765587/progress
+2026-06-22 07:46:19.129 +03:30 [INF] Response: 200
+2026-06-22 07:46:19.171 +03:30 [INF] Request: GET /api/documents/processing-status
+2026-06-22 07:46:19.191 +03:30 [INF] Response: 200
+2026-06-22 07:46:19.235 +03:30 [INF] Request: GET /api/documents/processed
+2026-06-22 07:46:19.242 +03:30 [INF] Response: 200
