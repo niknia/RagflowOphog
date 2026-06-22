@@ -3,8 +3,6 @@ using Rag.Contracts.DTOs;
 using Rag.Domain.Enums;
 
 namespace Rag.Contracts.Commands;
-
-public record DocumentUploadedNotification(Guid DocumentId, string FileName) : INotification;
 public class UploadDocumentCommand : IRequest<DocumentUploadResponse>
 {
     public Stream FileStream { get; set; } = Stream.Null;

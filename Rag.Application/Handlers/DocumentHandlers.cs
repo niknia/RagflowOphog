@@ -13,7 +13,6 @@ public class UploadDocumentHandler : IRequestHandler<UploadDocumentCommand, Docu
 {
     private readonly IDocumentRepository _documentRepository;
     private readonly IProcessingProgressRepository _progressRepository;
-    private readonly IMediator _mediator;
     private readonly ILogger<UploadDocumentHandler> _logger;
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     { ".pdf", ".docx", ".txt", ".csv", ".json", ".xml", ".html", ".htm", ".md", ".rtf" };
@@ -21,12 +20,10 @@ public class UploadDocumentHandler : IRequestHandler<UploadDocumentCommand, Docu
     public UploadDocumentHandler(
         IDocumentRepository documentRepository,
         IProcessingProgressRepository progressRepository,
-        IMediator mediator,
         ILogger<UploadDocumentHandler> logger)
     {
         _documentRepository = documentRepository;
         _progressRepository = progressRepository;
-        _mediator = mediator;
         _logger = logger;
     }
 
@@ -86,8 +83,6 @@ public class UploadDocumentHandler : IRequestHandler<UploadDocumentCommand, Docu
             UpdatedAt = DateTime.UtcNow
         };
         await _progressRepository.AddAsync(progress, ct);
-
-        await _mediator.Publish(new DocumentUploadedNotification(document.Id, document.FileName), ct);
 
         _logger.LogInformation("Document {Id} uploaded: {Name}", document.Id, document.FileName);
 

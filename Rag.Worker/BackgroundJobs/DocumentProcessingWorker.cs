@@ -209,31 +209,49 @@ public class DocumentProcessingWorker : BackgroundService
     }
 }
 
-public class DocumentProcessingHostedService : IHostedService
+public class DocumentProcessingHostedService : BackgroundService
 {
     private readonly DocumentProcessingChannel _channel;
-    private readonly IDocumentRepository _documentRepository;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<DocumentProcessingHostedService> _logger;
 
     public DocumentProcessingHostedService(
         DocumentProcessingChannel channel,
-        IDocumentRepository documentRepository,
+        IServiceScopeFactory scopeFactory,
         ILogger<DocumentProcessingHostedService> logger)
     {
         _channel = channel;
-        _documentRepository = documentRepository;
+        _scopeFactory = scopeFactory;
         _logger = logger;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var pendingDocs = await _documentRepository.GetPendingDocumentsAsync(50, cancellationToken);
-        foreach (var doc in pendingDocs)
-        {
-            await _channel.WriteAsync(new ProcessDocumentCommand { DocumentId = doc.Id }, cancellationToken);
-        }
-        _logger.LogInformation("Queued {Count} pending documents for processing", pendingDocs.Count);
-    }
+        _logger.LogInformation("Document polling service started");
 
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var documentRepository = scope.ServiceProvider.GetRequiredService<IDocumentRepository>();
+                var pendingDocs = await documentRepository.GetPendingDocumentsAsync(50, stoppingToken);
+
+                foreach (var doc in pendingDocs)
+                {
+                    await _channel.WriteAsync(new ProcessDocumentCommand { DocumentId = doc.Id }, stoppingToken);
+                    _logger.LogDebug("Queued pending document {Id} for processing", doc.Id);
+                }
+
+                if (pendingDocs.Count > 0)
+                    _logger.LogInformation("Queued {Count} pending documents for processing", pendingDocs.Count);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "Error polling for pending documents");
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        }
+    }
 }
