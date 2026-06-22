@@ -7,6 +7,10 @@ using Rag.Shared.Helpers;
 namespace Rag.Infrastructure.VectorStores;
 public class ChromaVectorStore : IVectorStore
 {
+    private const string Tenant = "default_tenant";
+    private const string Database = "default_database";
+    private static string CollectionPath(string collectionName) => $"/api/v2/tenants/{Tenant}/databases/{Database}/collections/{collectionName}";
+
     private readonly HttpClient _httpClient;
     private readonly ILogger<ChromaVectorStore> _logger;
 
@@ -18,7 +22,14 @@ public class ChromaVectorStore : IVectorStore
 
     public async Task CreateCollectionAsync(string collectionName, int vectorDimension = 1024, CancellationToken ct = default)
     {
-        var basePayload = new
+        var checkResponse = await _httpClient.GetAsync(CollectionPath(collectionName), ct);
+        if (checkResponse.IsSuccessStatusCode)
+        {
+            _logger.LogInformation("Chroma collection '{Name}' already exists", collectionName);
+            return;
+        }
+
+        var payload = new
         {
             name = collectionName,
             metadata = new Dictionary<string, object>
@@ -27,76 +38,22 @@ public class ChromaVectorStore : IVectorStore
             }
         };
 
-        var getEndpoints = new[] { $"/api/v2/collections/{collectionName}", $"/api/v1/collections/{collectionName}" };
-        foreach (var getEndpoint in getEndpoints)
+        var endpoint = $"/api/v2/tenants/{Tenant}/databases/{Database}/collections";
+        var response = await _httpClient.PostAsJsonAsync(endpoint, payload, ct);
+        if (response.IsSuccessStatusCode)
         {
-            try
-            {
-                var getResponse = await _httpClient.GetAsync(getEndpoint, ct);
-                if (getResponse.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("Chroma collection '{Name}' already exists (checked via {Endpoint})", collectionName, getEndpoint);
-                    return;
-                }
-                if (getResponse.StatusCode != System.Net.HttpStatusCode.NotFound)
-                {
-                    var errorContent = await getResponse.Content.ReadAsStringAsync(ct);
-                    _logger.LogWarning("Check collection via {Endpoint} failed: {StatusCode} - {Error}", getEndpoint, getResponse.StatusCode, errorContent);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Check collection via {Endpoint} threw exception", getEndpoint);
-            }
+            _logger.LogInformation("Created Chroma collection '{Name}'", collectionName);
+            return;
         }
 
-        var createAttempts = new[]
-        {
-            new { Endpoint = "/api/v2/collections", Method = HttpMethod.Post },
-            new { Endpoint = "/api/v1/collections", Method = HttpMethod.Post },
-            new { Endpoint = "/api/v1/collections", Method = HttpMethod.Put },
-        };
-
-        HttpResponseMessage? response = null;
-
-        foreach (var attempt in createAttempts)
-        {
-            try
-            {
-                var request = new HttpRequestMessage(attempt.Method, attempt.Endpoint)
-                {
-                    Content = JsonContent.Create(basePayload)
-                };
-                response = await _httpClient.SendAsync(request, ct);
-                
-                if (response.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("Created Chroma collection '{Name}' via {Method} {Endpoint}", collectionName, attempt.Method, attempt.Endpoint);
-                    return;
-                }
-
-                var errorContent = await response.Content.ReadAsStringAsync(ct);
-                _logger.LogWarning("Create collection via {Method} {Endpoint} failed: {StatusCode} - {Error}", attempt.Method, attempt.Endpoint, response.StatusCode, errorContent);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Create collection via {Method} {Endpoint} threw exception", attempt.Method, attempt.Endpoint);
-            }
-        }
-
-        if (response != null && !response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync(ct);
-            _logger.LogError("All create attempts failed for collection '{Name}'. Last error: {StatusCode} - {Error}", collectionName, response.StatusCode, errorContent);
-        }
-
-        response?.EnsureSuccessStatusCode();
-        _logger.LogInformation("Created Chroma collection: {Name}", collectionName);
+        var errorContent = await response.Content.ReadAsStringAsync(ct);
+        _logger.LogError("Failed to create collection '{Name}' via {Endpoint}: {StatusCode} - {Error}", collectionName, endpoint, response.StatusCode, errorContent);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task DeleteCollectionAsync(string collectionName, CancellationToken ct = default)
     {
-        var response = await _httpClient.DeleteAsync($"/api/v1/collections/{collectionName}", ct);
+        var response = await _httpClient.DeleteAsync(CollectionPath(collectionName), ct);
         response.EnsureSuccessStatusCode();
     }
 
@@ -108,14 +65,14 @@ public class ChromaVectorStore : IVectorStore
             embeddings = new[] { embedding },
             metadatas = new[] { JsonSerializer.Deserialize<Dictionary<string, object>>(metadata) ?? new() }
         };
-        var response = await _httpClient.PostAsJsonAsync($"/api/v1/collections/{collectionName}/add", payload, ct);
+        var response = await _httpClient.PostAsJsonAsync($"{CollectionPath(collectionName)}/add", payload, ct);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task DeleteAsync(string collectionName, string id, CancellationToken ct = default)
     {
         var payload = new { ids = new[] { id } };
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/collections/{collectionName}/delete")
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{CollectionPath(collectionName)}/delete")
         {
             Content = JsonContent.Create(payload)
         };
@@ -130,7 +87,7 @@ public class ChromaVectorStore : IVectorStore
             query_embeddings = new[] { queryEmbedding },
             n_results = limit
         };
-        var response = await _httpClient.PostAsJsonAsync($"/api/v1/collections/{collectionName}/query", payload, ct);
+        var response = await _httpClient.PostAsJsonAsync($"{CollectionPath(collectionName)}/query", payload, ct);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<ChromaQueryResponse>(cancellationToken: ct);
         if (result?.Ids == null || result.Ids.Count == 0)
@@ -159,13 +116,13 @@ public class ChromaVectorStore : IVectorStore
             embeddings = itemList.Select(i => i.Embedding).ToArray(),
             metadatas = itemList.Select(i => JsonSerializer.Deserialize<Dictionary<string, object>>(i.Metadata) ?? new()).ToArray()
         };
-        var response = await _httpClient.PostAsJsonAsync($"/api/v1/collections/{collectionName}/add", payload, ct);
+        var response = await _httpClient.PostAsJsonAsync($"{CollectionPath(collectionName)}/add", payload, ct);
         response.EnsureSuccessStatusCode();
     }
 
     public async Task<bool> CollectionExistsAsync(string collectionName, CancellationToken ct = default)
     {
-        var response = await _httpClient.GetAsync($"/api/v1/collections/{collectionName}", ct);
+        var response = await _httpClient.GetAsync(CollectionPath(collectionName), ct);
         return response.IsSuccessStatusCode;
     }
 
