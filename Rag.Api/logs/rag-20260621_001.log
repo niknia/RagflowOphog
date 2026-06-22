@@ -62,3 +62,4 @@ System.IO.IOException: Failed to bind to address http://127.0.0.1:5044: address 
 2026-06-21 15:08:22.625 +03:30 [INF] Response: 200
 2026-06-21 15:08:26.003 +03:30 [INF] Request: GET /api/system/providers
 2026-06-21 15:08:26.006 +03:30 [INF] Response: 200
+2026-06-21 23:44:40.868 -07:00 [INF] Starting RAG Platform API

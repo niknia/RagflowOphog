@@ -172,3 +172,22 @@ Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving 
 2026-06-22 07:46:19.191 +03:30 [INF] Response: 200
 2026-06-22 07:46:19.235 +03:30 [INF] Request: GET /api/documents/processed
 2026-06-22 07:46:19.242 +03:30 [INF] Response: 200
+2026-06-22 00:22:23.548 -07:00 [INF] Starting RAG Platform API
+2026-06-22 00:22:35.519 -07:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-06-22 00:22:35.545 -07:00 [INF] Request: GET /api/system/status
+2026-06-22 00:22:36.209 -07:00 [INF] Response: 200
+2026-06-22 00:24:38.358 -07:00 [INF] Starting RAG Platform API
+2026-06-22 00:24:52.500 -07:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-06-22 00:24:52.536 -07:00 [INF] Request: GET /api/system/status
+2026-06-22 00:24:53.258 -07:00 [INF] Response: 200
+2026-06-22 00:25:33.217 -07:00 [INF] Starting RAG Platform API
+2026-06-22 00:25:41.951 -07:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-06-22 00:25:41.972 -07:00 [INF] Request: GET /api/system/status
+2026-06-22 00:25:42.446 -07:00 [INF] Response: 200
+2026-06-22 00:26:13.118 -07:00 [INF] Request: POST /api/documents/upload
+2026-06-22 00:26:13.840 -07:00 [INF] Document "70a8814f-2b10-402e-9c0a-14841c00c374" uploaded: buildings-15-01130-v2.pdf
+2026-06-22 00:26:13.844 -07:00 [INF] Response: 200
+2026-06-22 00:26:37.363 -07:00 [INF] Request: GET /api/documents/70a8814f-2b10-402e-9c0a-14841c00c374/progress
+2026-06-22 00:26:37.478 -07:00 [INF] Response: 200
+2026-06-22 00:27:29.232 -07:00 [INF] Request: GET /api/collections
+2026-06-22 00:27:29.263 -07:00 [INF] Response: 200
