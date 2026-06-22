@@ -9,12 +9,10 @@ public class ChromaVectorStore : IVectorStore
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<ChromaVectorStore> _logger;
-    private const string DefaultBaseUrl = "http://localhost:8000";
 
     public ChromaVectorStore(HttpClient httpClient, ILogger<ChromaVectorStore> logger)
     {
         _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri(DefaultBaseUrl);
         _logger = logger;
     }
 
