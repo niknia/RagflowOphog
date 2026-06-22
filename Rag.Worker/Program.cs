@@ -1,9 +1,11 @@
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Rag.Infrastructure.Extensions;
 using Rag.Infrastructure.Persistence;
 using Rag.Worker.BackgroundJobs;
+using Rag.Worker.Handlers;
 using Rag.Worker.Services;
 
 var host = Host.CreateDefaultBuilder(args)
@@ -11,6 +13,7 @@ var host = Host.CreateDefaultBuilder(args)
     {
         services.AddRagInfrastructure(context.Configuration);
         services.AddRagApplication();
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DocumentUploadedHandler).Assembly));
 
         services.AddSingleton<DocumentProcessingChannel>();
         services.AddHostedService<DocumentProcessingWorker>();

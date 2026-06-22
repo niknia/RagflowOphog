@@ -79,7 +79,6 @@ public class HybridRetrievalService : IRetrievalService
         var keywordResults = keywordTask.Result;
 
         var merged = new Dictionary<string, SearchResult>();
-        int idx = 0;
         foreach (var vr in vectorResults)
         {
             merged[vr.Id] = new SearchResult

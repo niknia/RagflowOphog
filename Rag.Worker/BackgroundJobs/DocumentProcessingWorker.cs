@@ -202,7 +202,7 @@ public class DocumentProcessingWorker : BackgroundService
                 }, ct);
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Don't let progress reporting failure break the processing pipeline
         }

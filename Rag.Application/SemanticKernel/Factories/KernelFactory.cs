@@ -48,7 +48,7 @@ public class KernelFactory : IKernelFactory
     public Kernel CreateEmbeddingKernel(string model = "bge-m3")
     {
         var builder = Kernel.CreateBuilder();
-        builder.AddOllamaTextEmbeddingGeneration(model ?? _config.EmbeddingModel, new Uri(_config.BaseUrl));
+        builder.AddOllamaEmbeddingGenerator(endpoint: new Uri(_config.BaseUrl), modelId: model ?? _config.EmbeddingModel);
         return builder.Build();
     }
 }

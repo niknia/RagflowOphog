@@ -18,7 +18,7 @@ public partial class HybridChunkingService : IChunkingService
         _logger = logger;
     }
 
-    public async Task<IReadOnlyList<ChunkResult>> ChunkAsync(string text, ChunkingOptions options, CancellationToken ct = default)
+    public Task<IReadOnlyList<ChunkResult>> ChunkAsync(string text, ChunkingOptions options, CancellationToken ct = default)
     {
         var chunks = new List<ChunkResult>();
         var sections = SplitBySections(text);
@@ -63,7 +63,7 @@ public partial class HybridChunkingService : IChunkingService
             }
         }
 
-        return chunks;
+        return Task.FromResult<IReadOnlyList<ChunkResult>>(chunks);
     }
 
     private static ChunkResult BuildChunk(List<string> sentences, int index, string section, int page)

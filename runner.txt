@@ -1,0 +1,3 @@
+dotnet build RagPlatform.sln
+dotnet run --project Rag.Api\Rag.Api.csproj
+dotnet run --project Rag.Worker\Rag.Worker.csproj
