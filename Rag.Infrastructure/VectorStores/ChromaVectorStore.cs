@@ -18,8 +18,20 @@ public class ChromaVectorStore : IVectorStore
 
     public async Task CreateCollectionAsync(string collectionName, int vectorDimension = 1024, CancellationToken ct = default)
     {
-        var payload = new { name = collectionName, metadata = new { hnsw_space = "cosine", dimension = vectorDimension } };
+        var payload = new
+        {
+            name = collectionName,
+            metadata = new Dictionary<string, object>
+            {
+                ["hnsw:space"] = "cosine"
+            }
+        };
         var response = await _httpClient.PostAsJsonAsync("/api/v1/collections", payload, ct);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(ct);
+            _logger.LogError("Failed to create Chroma collection '{Name}': {StatusCode} - {Error}", collectionName, response.StatusCode, errorContent);
+        }
         response.EnsureSuccessStatusCode();
         _logger.LogInformation("Created Chroma collection: {Name}", collectionName);
     }
