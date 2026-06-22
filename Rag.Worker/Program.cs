@@ -22,9 +22,12 @@ Log.Logger = new LoggerConfiguration()
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}{NewLine}")
     .CreateLogger();
 
+var workerProjectPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..\\Rag.Worker"));
+
 try
 {
     var host = Host.CreateDefaultBuilder(args)
+        .UseContentRoot(workerProjectPath)
         .ConfigureServices((context, services) =>
         {
             var cs = context.Configuration["ConnectionStrings:DefaultConnection"] ?? "unknown";
