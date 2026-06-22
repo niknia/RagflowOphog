@@ -169,7 +169,7 @@ public class DocumentProcessingWorker : BackgroundService
         }
     }
 
-    private static async Task ReportProgressAsync(
+    private async Task ReportProgressAsync(
         IProcessingProgressRepository repo, Guid documentId, string fileName,
         int percent, string stage, string message, CancellationToken ct)
     {
@@ -201,10 +201,12 @@ public class DocumentProcessingWorker : BackgroundService
                     UpdatedAt = DateTime.UtcNow
                 }, ct);
             }
+
+            _logger.LogInformation("[{Stage}] {FileName}: {Percent}% - {Message}", stage, fileName, percent, message);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Don't let progress reporting failure break the processing pipeline
+            _logger.LogWarning(ex, "Progress report failed for {FileName} (non-critical)", fileName);
         }
     }
 }

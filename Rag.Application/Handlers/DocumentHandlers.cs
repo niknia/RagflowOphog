@@ -33,7 +33,8 @@ public class UploadDocumentHandler : IRequestHandler<UploadDocumentCommand, Docu
         if (!AllowedExtensions.Contains(ext))
             throw new InvalidOperationException($"File type '{ext}' is not supported");
 
-        var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        var solutionRoot = Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\..");
+        var uploadsDir = Path.Combine(solutionRoot, "Uploads");
         Directory.CreateDirectory(uploadsDir);
         var filePath = Path.Combine(uploadsDir, $"{Guid.NewGuid()}{ext}");
 
