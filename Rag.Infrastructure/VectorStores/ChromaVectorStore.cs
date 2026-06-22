@@ -26,13 +26,37 @@ public class ChromaVectorStore : IVectorStore
                 ["hnsw:space"] = "cosine"
             }
         };
-        var response = await _httpClient.PostAsJsonAsync("/api/v1/collections", payload, ct);
-        if (!response.IsSuccessStatusCode)
+
+        var endpoints = new[] { "/api/v2/collections", "/api/v1/collections" };
+        HttpResponseMessage? response = null;
+
+        foreach (var endpoint in endpoints)
+        {
+            try
+            {
+                response = await _httpClient.PostAsJsonAsync(endpoint, payload, ct);
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Created Chroma collection '{Name}' via {Endpoint}", collectionName, endpoint);
+                    return;
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync(ct);
+                _logger.LogWarning("Create collection via {Endpoint} failed: {StatusCode} - {Error}", endpoint, response.StatusCode, errorContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Create collection via {Endpoint} threw exception", endpoint);
+            }
+        }
+
+        if (response != null && !response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync(ct);
-            _logger.LogError("Failed to create Chroma collection '{Name}': {StatusCode} - {Error}", collectionName, response.StatusCode, errorContent);
+            _logger.LogError("All endpoints failed for collection '{Name}'. Last error: {StatusCode} - {Error}", collectionName, response.StatusCode, errorContent);
         }
-        response.EnsureSuccessStatusCode();
+
+        response?.EnsureSuccessStatusCode();
         _logger.LogInformation("Created Chroma collection: {Name}", collectionName);
     }
 
