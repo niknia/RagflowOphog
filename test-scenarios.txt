@@ -1,0 +1,491 @@
+====================================================================
+ RAGFLOW TEST SCENARIOS & API EXAMPLES
+====================================================================
+ Date: 2026-06-23
+ Base URL: http://192.168.198.45:5000  (or wherever the API runs)
+====================================================================
+
+توجه: فایل PDF بخاطر قطع بودن سرور Chroma و ElasticSearch
+پردازش کامل نشده. متن واقعی استخراج نشده، ولی نام فایل
+buildings-15-01130-v2.pdf  نشان می‌دهد مربوط به ساختمان‌ها است.
+
+
+====================================================================
+ 1) SYSTEM HEALTH — بررسی سلامت سیستم
+====================================================================
+
+ 1.1) GET /api/system/status
+      curl -X GET "http://localhost:5000/api/system/status"
+
+      Expected: 200 OK
+      {
+        "version": "1.0.0",
+        "vectorDatabaseConnected": true/false,
+        "searchEngineConnected": true/false,
+        "ollamaConnected": true/false,
+        "activeVectorProvider": "Chroma",
+        "activeSearchProvider": "ElasticSearch",
+        "chatModel": "llama3.1:8b",
+        "embeddingModel": "bge-m3",
+        "totalDocuments": 2,
+        "totalChunks": 0
+      }
+
+ 1.2) GET /api/system/providers
+      curl -X GET "http://localhost:5000/api/system/providers"
+
+      Expected: 200 OK — لیست تمام ارائه‌دهندگان فعال
+
+
+====================================================================
+ 2) DOCUMENTS — مدیریت اسناد
+====================================================================
+
+ 2.1) POST /api/documents/upload  — آپلود سند جدید
+      curl -X POST "http://localhost:5000/api/documents/upload?collectionId=default&collectionName=knowledge-base" \
+        -F "file=@test.pdf"
+
+      Expected: 200 OK
+      {
+        "id": "guid",
+        "fileName": "test.pdf",
+        "status": "Pending",
+        "message": "Document uploaded successfully"
+      }
+
+ 2.2) GET /api/documents — لیست اسناد
+      curl -X GET "http://localhost:5000/api/documents?page=1&pageSize=20"
+
+      Expected: 200 OK — لیست اسناد با pagination
+
+ 2.3) GET /api/documents/{id} — جزئیات سند
+      curl -X GET "http://localhost:5000/api/documents/70A8814F-2B10-402E-9C0A-14841C00C374"
+
+      Expected: 200 OK
+      {
+        "id": "70A8814F-...",
+        "fileName": "buildings-15-01130-v2.pdf",
+        "contentType": "application/pdf",
+        "fileSize": 1801501,
+        "status": "Ready",
+        "collectionName": "knowledge-base",
+        "detectedLanguage": "Mixed",
+        "chunkCount": 15621,
+        "errorMessage": "...",
+        "createdAt": "...",
+        "processedAt": "..."
+      }
+
+ 2.4) GET /api/documents/{id}/progress — پیشرفت پردازش
+      curl -X GET "http://localhost:5000/api/documents/70A8814F-2B10-402E-9C0A-14841C00C374/progress"
+
+      Expected: 200 OK
+      {
+        "documentId": "70A8814F-...",
+        "fileName": "buildings-15-01130-v2.pdf",
+        "percent": 100,
+        "stage": "Indexing",
+        "message": "...",
+        "status": "Failed"
+      }
+
+ 2.5) GET /api/documents/processing-status — اسناد در حال پردازش
+      curl -X GET "http://localhost:5000/api/documents/processing-status"
+
+ 2.6) GET /api/documents/processed — اسناد پردازش شده
+      curl -X GET "http://localhost:5000/api/documents/processed"
+
+ 2.7) POST /api/documents/reindex/{id} — پردازش مجدد
+      curl -X POST "http://localhost:5000/api/documents/reindex/70A8814F-2B10-402E-9C0A-14841C00C374"
+
+      Expected: 200 OK
+      { "message": "Document queued for reindexing" }
+
+ 2.8) DELETE /api/documents/{id} — حذف سند
+      curl -X DELETE "http://localhost:5000/api/documents/BC6B2CB0-C663-43F6-8D31-5EA7FA765587"
+
+      Expected: 204 No Content
+
+
+====================================================================
+ 3) COLLECTIONS — مدیریت مجموعه‌ها
+====================================================================
+
+ 3.1) POST /api/collections — ایجاد مجموعه جدید
+      curl -X POST "http://localhost:5000/api/collections" \
+        -H "Content-Type: application/json" \
+        -d '{"name":"test-collection","description":"Collection for testing","vectorDimension":1024}'
+
+      Expected: 200 OK
+      {
+        "id": "test-collection",
+        "name": "test-collection",
+        "description": "Collection for testing",
+        "vectorDimension": 1024,
+        "documentCount": 0,
+        "chunkCount": 0,
+        "createdAt": "..."
+      }
+
+ 3.2) GET /api/collections — لیست مجموعه‌ها
+      curl -X GET "http://localhost:5000/api/collections"
+
+      Expected: 200 OK
+      [
+        {
+          "id": "default",
+          "name": "knowledge-base",
+          "description": "...",
+          "vectorDimension": 1024,
+          "documentCount": 1,
+          "chunkCount": 0,
+          "createdAt": "..."
+        }
+      ]
+
+ 3.3) DELETE /api/collections/{id} — حذف مجموعه
+      curl -X DELETE "http://localhost:5000/api/collections/test-collection"
+
+      Expected: 204 No Content
+
+
+====================================================================
+ 4) VECTOR STORE — وضعیت پایگاه داده برداری
+====================================================================
+
+ 4.1) GET /api/vectorstore/status — وضعیت Chroma
+      curl -X GET "http://localhost:5000/api/vectorstore/status?collectionName=knowledge-base"
+
+      Expected: 200 OK
+      {
+        "collectionName": "knowledge-base",
+        "exists": true/false,
+        "status": "available" | "not_found"
+      }
+
+ 4.2) GET /api/vectorstore/search — جستجوی برداری مستقیم
+      curl -X GET "http://localhost:5000/api/vectorstore/search?query=energy+efficiency+buildings&collectionName=knowledge-base&limit=5"
+
+
+====================================================================
+ 5) SEARCH — جستجو (Keyword / Vector / Hybrid)
+====================================================================
+
+ 5.1) POST /api/search — جستجوی ترکیبی (Hybrid default)
+      curl -X POST "http://localhost:5000/api/search" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "query": "building energy efficiency",
+          "mode": "Hybrid",
+          "collectionId": "default",
+          "limit": 10,
+          "scoreThreshold": 0.0,
+          "rerankingMode": "ScoreFusion"
+        }'
+
+      Expected: 200 OK
+      {
+        "query": "building energy efficiency",
+        "mode": "Hybrid",
+        "results": [ ... ],
+        "latencyMs": 123
+      }
+
+ 5.2) POST /api/search/vector — جستجوی برداری
+      curl -X POST "http://localhost:5000/api/search/vector" \
+        -H "Content-Type: application/json" \
+        -d '{"query":"sustainable architecture","collectionId":"default","limit":5}'
+
+ 5.3) POST /api/search/keyword — جستجوی متنی
+      curl -X POST "http://localhost:5000/api/search/keyword" \
+        -H "Content-Type: application/json" \
+        -d '{"query":"building materials","collectionId":"default","limit":5}'
+
+ 5.4) POST /api/search/hybrid — جستجوی ترکیبی
+      curl -X POST "http://localhost:5000/api/search/hybrid" \
+        -H "Content-Type: application/json" \
+        -d '{"query":"energy consumption buildings","collectionId":"default","limit":10,"rerankingMode":"ScoreFusion"}'
+
+
+====================================================================
+ 6) CHAT — چت با مدل + RAG
+====================================================================
+
+ 6.1) POST /api/chat/create — ایجاد چت جدید
+      curl -X POST "http://localhost:5000/api/chat/create" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "title": "Test Chat - Building Analysis",
+          "collectionId": "default",
+          "model": "llama3.1:8b"
+        }'
+
+      Expected: 200 OK
+      {
+        "id": "guid-...",
+        "title": "Test Chat - Building Analysis"
+      }
+
+ 6.2) POST /api/chat/{id}/message — ارسال پیام
+      (ابتدا id چت را از مرحله قبل ذخیره کنید)
+      CHAT_ID="<guid از مرحله 6.1>"
+
+      curl -X POST "http://localhost:5000/api/chat/$CHAT_ID/message" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "message": "What are the key factors in building energy efficiency?",
+          "retrievalMode": "Hybrid",
+          "collectionId": "default"
+        }'
+
+      Expected: 200 OK
+      {
+        "content": "...response from LLM...",
+        "citations": [
+          {
+            "documentName": "buildings-15-01130-v2.pdf",
+            "collection": "knowledge-base",
+            "pageNumber": 1,
+            "chunkNumber": 0,
+            "retrievalSource": "Elasticsearch",
+            "vectorScore": 0.85,
+            "elasticScore": 0.75,
+            "score": 0.82,
+            "searchType": "Hybrid",
+            "content": "..."
+          }
+        ],
+        "promptTokens": 150,
+        "completionTokens": 200,
+        "latencyMs": 4500
+      }
+
+ 6.3) GET /api/chat/{id}/history — تاریخچه چت
+      curl -X GET "http://localhost:5000/api/chat/$CHAT_ID/history"
+
+      Expected: 200 OK
+      {
+        "id": "guid",
+        "title": "Test Chat - Building Analysis",
+        "model": "llama3.1:8b",
+        "collectionId": "default",
+        "messages": [
+          {
+            "id": "guid",
+            "role": "user",
+            "content": "What are the key factors in building energy efficiency?",
+            "retrievalMode": "Hybrid",
+            "citations": [],
+            "createdAt": "..."
+          },
+          {
+            "id": "guid",
+            "role": "assistant",
+            "content": "...",
+            "retrievalMode": "Hybrid",
+            "citations": [ ... ],
+            "createdAt": "..."
+          }
+        ],
+        "createdAt": "..."
+      }
+
+
+====================================================================
+ 7) سناریوهای تست کامل (End-to-End Scenarios)
+====================================================================
+
+ ──────────────────────────────────────────────
+ سناریو 1: آپلود سند + بررسی وضعیت + پردازش
+ ──────────────────────────────────────────────
+
+ 1. آپلود فایل:
+    curl -X POST "http://localhost:5000/api/documents/upload?collectionId=default&collectionName=knowledge-base" \
+      -F "file=@report.pdf"
+    → ذخیره id برگشتی
+
+ 2. بررسی وضعیت (polling):
+    curl -X GET "http://localhost:5000/api/documents/{id}/progress"
+    → مرتب چک کن تا status = "Ready" یا "Failed" بشه
+
+ 3. بررسی جزئیات نهایی:
+    curl -X GET "http://localhost:5000/api/documents/{id}"
+
+ ──────────────────────────────────────────────
+ سناریو 2: جستجو با حالت‌های مختلف
+ ──────────────────────────────────────────────
+
+ 1. Keyword Search:
+    curl -X POST "http://localhost:5000/api/search/keyword" \
+      -H "Content-Type: application/json" \
+      -d '{"query":"ساختمان انرژی","collectionId":"default","limit":5}'
+
+ 2. Vector Search:
+    curl -X POST "http://localhost:5000/api/search/vector" \
+      -H "Content-Type: application/json" \
+      -d '{"query":"energy efficient building design","collectionId":"default","limit":5}'
+
+ 3. Hybrid Search:
+    curl -X POST "http://localhost:5000/api/search/hybrid" \
+      -H "Content-Type: application/json" \
+      -d '{"query":"ساختمان سبز و مصرف انرژی","collectionId":"default","limit":10,"rerankingMode":"ScoreFusion"}'
+
+ ──────────────────────────────────────────────
+ سناریو 3: چت با مدل + RAG
+ ──────────────────────────────────────────────
+
+ 1. ایجاد چت:
+    curl -X POST "http://localhost:5000/api/chat/create" \
+      -H "Content-Type: application/json" \
+      -d '{"title":"Energy Analysis","collectionId":"default","model":"llama3.1:8b"}'
+    → ذخیره chatId
+
+ 2. سوال اول:
+    curl -X POST "http://localhost:5000/api/chat/{chatId}/message" \
+      -H "Content-Type: application/json" \
+      -d '{"message":"What factors affect building energy efficiency?","retrievalMode":"Hybrid","collectionId":"default"}'
+
+ 3. سوال دوم (ادامه مکالمه):
+    curl -X POST "http://localhost:5000/api/chat/{chatId}/message" \
+      -H "Content-Type: application/json" \
+      -d '{"message":"How does insulation impact energy consumption?","retrievalMode":"Hybrid","collectionId":"default"}'
+
+ 4. مشاهده تاریخچه:
+    curl -X GET "http://localhost:5000/api/chat/{chatId}/history"
+
+
+====================================================================
+ 8) سوالات پیشنهادی برای تست (بر اساس فایل buildings PDF)
+====================================================================
+
+ توجه: متن واقعی PDF استخراج نشده (چون Chroma قطع بود)،
+ ولی بر اساس نام فایل (buildings) و سایز (1.8MB) این سوالات
+ می‌توانند برای تست ارسال شوند:
+
+ ── سوالات انگلیسی ──
+
+ 1. "What are the main types of building structures discussed in this document?"
+ 2. "What are the key factors in building energy efficiency?"
+ 3. "How do different building materials affect structural integrity?"
+ 4. "What are the latest trends in sustainable building design?"
+ 5. "Compare traditional vs modern building construction methods."
+ 6. "What role does insulation play in building energy performance?"
+ 7. "How does building orientation affect energy consumption?"
+ 8. "What are the most common building codes and standards?"
+ 9. "Explain the relationship between building height and structural requirements."
+ 10. "What are the environmental impacts of different building materials?"
+
+ ── سوالات فارسی (Mixed Language) ──
+
+ 11. "عوامل موثر در بهینه‌سازی مصرف انرژی ساختمان‌ها چیست؟"
+ 12. "مصالح ساختمانی مدرن چه تفاوتی با مصالح سنتی دارند؟"
+ 13. "سیستم‌های گرمایش و سرمایش در ساختمان‌های سبز چگونه طراحی می‌شوند؟"
+ 14. "استانداردهای بین‌المللی ساختمان‌سازی چیست؟"
+ 15. "چگونه می‌توان مصرف انرژی در ساختمان‌ها را کاهش داد؟"
+ 16. "بهینه‌سازی مصرف انرژی در ساختمان‌های مسکونی و تجاری"
+ 17. "تاثیر عایق‌بندی بر کاهش مصرف انرژی ساختمان"
+ 18. "روش‌های نوین ساخت و ساز پایدار"
+ 19. "مدیریت پسماند در پروژه‌های ساختمانی"
+ 20. "سیستم‌های هوشمند مدیریت انرژی در ساختمان‌ها"
+
+ ── سوالات ترکیبی (برای تست چت با RAG) ──
+
+ 21. "با توجه به اطلاعات موجود، مهمترین راهکارهای کاهش مصرف انرژی در ساختمان‌ها چیست؟"
+     (با retrievalMode=Hybrid)
+ 22. "بر اساس مستندات، چه نوع مصالحی برای ساخت ساختمان‌های پایدار توصیه شده است؟"
+     (با retrievalMode=VectorOnly)
+ 23. "خلاصه‌ای از مهمترین نکات فنی این مقاله در مورد ساختمان‌ها ارائه بده"
+     (با retrievalMode=KeywordOnly)
+
+
+====================================================================
+ 9) SIGNALR — اتصال بلادرنگ برای پیشرفت پردازش
+====================================================================
+
+ اتصال به hub:
+   ws://localhost:5000/hub/progress
+
+ عضویت در گروه یک سند:
+   connection.invoke("JoinDocumentGroup", "70A8814F-2B10-402E-9C0A-14841C00C374")
+
+ خروج از گروه:
+   connection.invoke("LeaveDocumentGroup", "70A8814F-2B10-402E-9C0A-14841C00C374")
+
+ رویدادهای دریافتی: (پیشرفت پردازش به صورت real-time)
+
+
+====================================================================
+ 10) DOCKER SERVICES — سرویس‌های زیرساخت
+====================================================================
+
+ ── ElasticSearch ──
+   URL: http://192.168.198.45:9200
+   Index: knowledge-index
+
+   curl -X GET "http://192.168.198.45:9200/_cat/indices?v"
+   curl -X GET "http://192.168.198.45:9200/knowledge-index/_count"
+
+ ── Chroma ──
+   URL: http://192.168.198.45:8888
+   Collection: knowledge-base
+
+   curl -X GET "http://192.168.198.45:8888/api/v2/tenants/default_tenant/databases/default_database/collections"
+
+ ── Ollama ──
+   URL: http://192.168.198.45:11434
+
+   curl -X GET "http://192.168.198.45:11434/api/tags"
+   curl -X POST "http://192.168.198.45:11434/api/generate" \
+     -d '{"model":"llama3.1:8b","prompt":"Hello","stream":false}'
+
+   مدل‌های موجود:
+   - llama3.1:8b  (Chat)
+   - bge-m3       (Embedding)
+
+
+====================================================================
+ 11) LOGS — بررسی لاگ‌های Worker
+====================================================================
+
+ Worker لاگ‌ها را در مسیر زیر ذخیره می‌کند:
+   D:\project\RagflowOphog\logs\worker-error-*.log
+
+ همچنین کنسول Worker مراحل پردازش را نشان می‌دهد:
+   [Queued]    filename.pdf: 0%   - Document queued
+   [Extracting] filename.pdf: 10%  - Extracting text
+   [Chunking]  filename.pdf: 25%  - Splitting into chunks
+   [Embedding] filename.pdf: 40%  - Generating embeddings (batch X/Y)
+   [Indexing]  filename.pdf: 45%  - Indexing in vector store (batch X/Y)
+   [Completed] filename.pdf: 100% - Processing completed
+   [Failed]    filename.pdf: 100% - Error: <reason>
+
+
+====================================================================
+ 12) STATUS CHECKLIST — چک‌لیست نهایی
+====================================================================
+
+ [ ] POST /api/documents/upload           — آپلود فایل جدید
+ [ ] GET  /api/documents/{id}             — مشاهده جزئیات
+ [ ] GET  /api/documents/{id}/progress    — رصد پیشرفت
+ [ ] POST /api/documents/reindex/{id}     — پردازش مجدد
+ [ ] POST /api/search                     — جستجوی ترکیبی
+ [ ] POST /api/search/keyword             — جستجوی متنی
+ [ ] POST /api/search/vector              — جستجوی برداری
+ [ ] POST /api/search/hybrid              — جستجوی هیبرید
+ [ ] POST /api/chat/create                — ایجاد چت
+ [ ] POST /api/chat/{id}/message          — ارسال پیام (RAG)
+ [ ] GET  /api/chat/{id}/history          — تاریخچه چت
+ [ ] POST /api/collections                — ایجاد مجموعه
+ [ ] GET  /api/collections                — لیست مجموعه‌ها
+ [ ] GET  /api/vectorstore/status         — وضعیت Chroma
+ [ ] GET  /api/vectorstore/search         — جستجوی برداری
+ [ ] GET  /api/system/status              — سلامت سیستم
+ [ ] GET  /api/system/providers           — ارائه‌دهندگان
+ [ ] DELETE /api/documents/{id}           — حذف سند
+ [ ] DELETE /api/collections/{id}         — حذف مجموعه
+ [ ] SignalR /hub/progress                — اتصال بلادرنگ
+
+
+====================================================================
+ END OF TEST SCENARIOS
+====================================================================
