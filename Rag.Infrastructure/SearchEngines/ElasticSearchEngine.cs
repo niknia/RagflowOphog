@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text.Json;
 using Elasticsearch.Net;
 using Microsoft.Extensions.Logging;
@@ -134,23 +135,52 @@ public class ElasticSearchEngine : ISearchEngine
         }
         var response = await _client.BulkAsync(bulk, ct);
 
-        var failedItems = response.ItemsWithErrors?.ToList() ?? [];
-        if (response.IsValid && failedItems.Count == 0)
-            return;
-
-        if (failedItems.Count > 0)
+        // NEST 7.x misparses ES 8.x bulk responses: IsValid=false + ItemsWithErrors
+        // returned even when all items succeed with 201. Trust the raw response body.
+        if (response.ApiCall?.ResponseBodyInBytes is not null)
         {
-            var errors = string.Join("; ", failedItems
-                .Select(i => $"[{i.Id}]: {i.Error?.Reason ?? "unknown"}"));
-            var debug = response.DebugInformation;
-            _logger.LogError("Bulk index had {Count} failed item(s): {Errors}. Debug: {Debug}",
-                failedItems.Count, errors, debug);
-            throw new InvalidOperationException($"Bulk index failed for {failedItems.Count} item(s): {errors}");
+            var rawSpan = new ReadOnlySequence<byte>(response.ApiCall.ResponseBodyInBytes);
+            using var jsonDoc = JsonDocument.Parse(rawSpan);
+            var root = jsonDoc.RootElement;
+
+            if (root.TryGetProperty("errors", out var errFlag) && !errFlag.GetBoolean())
+                return;
+
+            if (root.TryGetProperty("items", out var items))
+            {
+                var errors = new List<string>();
+                foreach (var item in items.EnumerateArray())
+                {
+                    if (!item.TryGetProperty("index", out var idx)) continue;
+                    var status = idx.GetProperty("status").GetInt32();
+                    if (status < 400) continue;
+                    var itemId = idx.GetProperty("_id").GetString();
+                    var reason = idx.TryGetProperty("error", out var er)
+                        ? er.GetProperty("reason").GetString() ?? "unknown"
+                        : "unknown";
+                    errors.Add($"[{itemId}] ({status}): {reason}");
+                }
+                if (errors.Count > 0)
+                {
+                    var msg = string.Join("; ", errors);
+                    _logger.LogError("Bulk index failed: {Errors}", msg);
+                    throw new InvalidOperationException($"Bulk index failed: {msg}");
+                }
+                return;
+            }
         }
 
-        _logger.LogWarning(
-            "Bulk index top-level IsValid=false but all {Count} items succeeded (NEST client metadata issue). Debug: {Debug}",
-            response.Items?.Count ?? 0, response.DebugInformation);
+        // Fallback: trust NEST (no raw body available)
+        if (response.IsValid)
+            return;
+
+        var failed = response.ItemsWithErrors?.ToList() ?? [];
+        if (failed.Count == 0)
+            return;
+
+        var errStr = string.Join("; ", failed.Select(i => $"[{i.Id}]: {i.Error?.Reason ?? "unknown"}"));
+        _logger.LogError("Bulk index failed: {Errors}", errStr);
+        throw new InvalidOperationException($"Bulk index failed: {errStr}");
     }
 }
 
