@@ -80,7 +80,9 @@ public static class ServiceCollectionExtensions
         }
 
         var elasticUrl = configuration["ElasticSearch:Url"] ?? "http://localhost:9200";
-        var settings = new ConnectionSettings(new Uri(elasticUrl)).DefaultIndex("knowledge-index");
+        var settings = new ConnectionSettings(new Uri(elasticUrl))
+            .DefaultIndex("knowledge-index")
+            .DisableDirectStreaming();
         services.AddSingleton<IElasticClient>(new ElasticClient(settings));
 
         if (searchProvider.Equals("OpenSearch", StringComparison.OrdinalIgnoreCase))

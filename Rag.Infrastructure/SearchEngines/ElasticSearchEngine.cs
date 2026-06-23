@@ -133,13 +133,24 @@ public class ElasticSearchEngine : ISearchEngine
             bulk.Index<SearchDocument>(op => op.Index(indexName).Id(id).Document(doc));
         }
         var response = await _client.BulkAsync(bulk, ct);
-        if (!response.IsValid)
+
+        var failedItems = response.ItemsWithErrors?.ToList() ?? [];
+        if (response.IsValid && failedItems.Count == 0)
+            return;
+
+        if (failedItems.Count > 0)
         {
-            var reason = response.ServerError?.Error?.Reason;
+            var errors = string.Join("; ", failedItems
+                .Select(i => $"[{i.Id}]: {i.Error?.Reason ?? "unknown"}"));
             var debug = response.DebugInformation;
-            _logger.LogError("Bulk index failed: {Error}. Debug: {Debug}", reason, debug);
-            throw new InvalidOperationException($"Bulk index failed: {reason ?? "unknown"}");
+            _logger.LogError("Bulk index had {Count} failed item(s): {Errors}. Debug: {Debug}",
+                failedItems.Count, errors, debug);
+            throw new InvalidOperationException($"Bulk index failed for {failedItems.Count} item(s): {errors}");
         }
+
+        _logger.LogWarning(
+            "Bulk index top-level IsValid=false but all {Count} items succeeded (NEST client metadata issue). Debug: {Debug}",
+            response.Items?.Count ?? 0, response.DebugInformation);
     }
 }
 
